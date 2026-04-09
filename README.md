@@ -1,2 +1,2 @@
-# roStEMo
-roStEMo project
+# roSTEMo
+roSTEMo project
