@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoSTEMo — Реєстрація</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d11;
+    --bg2: #13131a;
+    --surface: #1e1e2e;
+    --border: rgba(139,92,246,0.15);
+    --border2: rgba(139,92,246,0.35);
+    --violet: #8b5cf6;
+    --violet-light: #a78bfa;
+    --violet-dim: rgba(139,92,246,0.12);
+    --violet-glow: rgba(139,92,246,0.3);
+    --teal: #2dd4bf;
+    --amber: #f59e0b;
+    --text: #e8e8f0;
+    --text-muted: #8888a8;
+    --error: #f43f5e;
+    --success: #2dd4bf;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-x: hidden;
+    position: relative;
+    padding: 40px 20px 60px;
+  }
+
+  .bg-blob {
+    position: fixed; border-radius: 50%;
+    filter: blur(80px); pointer-events: none; z-index: 0;
+  }
+  .blob1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(139,92,246,0.15), transparent 70%);
+    top: -150px; right: -100px;
+    animation: blobmove1 9s ease-in-out infinite alternate;
+  }
+  .blob2 {
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(45,212,191,0.1), transparent 70%);
+    bottom: 0; left: -100px;
+    animation: blobmove2 11s ease-in-out infinite alternate;
+  }
+  @keyframes blobmove1 { from{transform:translate(0,0)} to{transform:translate(-30px,40px)} }
+  @keyframes blobmove2 { from{transform:translate(0,0)} to{transform:translate(30px,-20px)} }
+
+  body::before {
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.3;
+  }
+
+  .card {
+    position: relative; z-index: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px 44px;
+    width: 100%; max-width: 500px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    animation: cardIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; text-decoration: none; }
+  .logo-text {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px;
+    background: linear-gradient(135deg, var(--violet-light), var(--teal));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(0.8)} }
+
+  .heading { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .sub { color: var(--text-muted); font-size: 14px; margin-top: 6px; line-height: 1.5; }
+
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* Role selector */
+  .role-label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px; display: block;
+  }
+  .role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+  .role-card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 8px; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: var(--bg2);
+    user-select: none;
+  }
+  .role-card:hover { border-color: var(--border2); }
+  .role-card.selected {
+    border-color: var(--violet);
+    background: var(--violet-dim);
+    box-shadow: 0 0 0 1px var(--violet);
+  }
+  .role-icon { font-size: 22px; margin-bottom: 5px; }
+  .role-name { font-size: 12px; font-weight: 700; }
+  .role-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
+
+  /* Form */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { margin-bottom: 16px; }
+  label {
+    display: block; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-muted); margin-bottom: 7px;
+  }
+  .input-wrap { position: relative; }
+  .input-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    font-size: 15px; pointer-events: none;
+  }
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    width: 100%; background: var(--bg2);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 14px 12px 42px; color: var(--text);
+    font-size: 14px; font-family: 'Manrope', sans-serif; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-dim); }
+  input::placeholder { color: var(--text-muted); }
+  input.error { border-color: var(--error); }
+  input.valid { border-color: var(--success); }
+
+  .password-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--text-muted); font-size: 15px; transition: color 0.2s;
+  }
+  .password-toggle:hover { color: var(--text); }
+
+  .error-msg {
+    display: none; color: var(--error); font-size: 11px;
+    margin-top: 4px; font-weight: 600;
+  }
+  .error-msg.show { display: block; }
+
+  /* Password strength */
+  .strength-bar-wrap { margin-top: 8px; }
+  .strength-track { height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+  .strength-fill {
+    height: 100%; border-radius: 2px; width: 0%;
+    transition: width 0.3s, background 0.3s;
+  }
+  .strength-label { font-size: 10px; margin-top: 4px; font-weight: 600; color: var(--text-muted); }
+
+  /* Terms checkbox */
+  .terms-wrap {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 22px; cursor: pointer;
+  }
+  .terms-wrap input[type="checkbox"] {
+    width: 16px; height: 16px; min-width: 16px; padding: 0;
+    border-radius: 4px; accent-color: var(--violet);
+    cursor: pointer; margin-top: 2px;
+  }
+  .terms-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .terms-text a { color: var(--violet-light); text-decoration: none; }
+  .terms-text a:hover { text-decoration: underline; }
+
+  /* Submit */
+  .btn-submit {
+    width: 100%; padding: 14px;
+    background: var(--violet); border: none; border-radius: var(--radius);
+    color: #fff; font-size: 15px; font-weight: 700;
+    font-family: 'Manrope', sans-serif; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 0 24px var(--violet-glow); letter-spacing: 0.3px;
+    position: relative; overflow: hidden;
+  }
+  .btn-submit::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.08));
+  }
+  .btn-submit:hover { background: var(--violet-light); transform: translateY(-1px); box-shadow: 0 0 36px var(--violet-glow); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit.loading { opacity: 0.7; pointer-events: none; }
+
+  .or-sep {
+    display: flex; align-items: center; gap: 12px;
+    margin: 22px 0; color: var(--text-muted); font-size: 12px; font-weight: 600;
+  }
+  .or-sep::before, .or-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .social-btns { display: flex; gap: 10px; }
+  .btn-social {
+    flex: 1; padding: 11px; background: var(--bg2);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text-muted); font-size: 13px; font-weight: 600;
+    font-family: 'Manrope', sans-serif; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-social:hover { border-color: var(--border2); color: var(--text); }
+
+  .bottom-link {
+    text-align: center; margin-top: 24px;
+    font-size: 13px; color: var(--text-muted);
+  }
+  .bottom-link a { color: var(--violet-light); text-decoration: none; font-weight: 600; }
+  .bottom-link a:hover { text-decoration: underline; }
+
+  /* Benefits strip */
+  .benefits {
+    display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .benefit {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-muted); font-weight: 500;
+  }
+  .benefit-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); }
+
+  .home-link {
+    position: fixed; top: 24px; left: 24px; z-index: 10;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 20px; transition: all 0.2s;
+  }
+  .home-link:hover { color: var(--text); border-color: var(--border2); }
+
+  /* Steps indicator */
+  .steps {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 28px;
+  }
+  .step {
+    height: 3px; border-radius: 2px; flex: 1;
+    background: var(--border); transition: background 0.4s;
+  }
+  .step.active { background: var(--violet); }
+  .step.done { background: var(--teal); }
+  .step-label { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
+
+  @media (max-width: 520px) {
+    .card { padding: 36px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+    .role-grid { grid-template-columns: 1fr; }
+    body { padding-top: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+
+<a href="index.html" class="home-link">← Головна</a>
+
+<div class="card">
+  <a href="index.html" class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-text">RoSTEMo</span>
+  </a>
+
+  <h1 class="heading">Створити акаунт</h1>
+  <p class="sub">Приєднуйся до тисяч дослідників — безкоштовно та без обмежень.</p>
+
+  <div class="benefits" style="margin-top:14px;">
+    <span class="benefit"><span class="benefit-dot"></span>ШІ-підбір керівника</span>
+    <span class="benefit"><span class="benefit-dot"></span>Публікуй дослідження</span>
+    <span class="benefit"><span class="benefit-dot"></span>Доступ до лабораторій</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Role selector -->
+  <span class="role-label">Я є...</span>
+  <div class="role-grid" id="roleGrid">
+    <div class="role-card selected" data-role="school">
+      <div class="role-icon">🎒</div>
+      <div class="role-name">Школяр</div>
+      <div class="role-desc">МАН, олімпіади</div>
+    </div>
+    <div class="role-card" data-role="student">
+      <div class="role-icon">🎓</div>
+      <div class="role-name">Студент</div>
+      <div class="role-desc">Бакалавр / магістр</div>
+    </div>
+    <div class="role-card" data-role="scientist">
+      <div class="role-icon">🔬</div>
+      <div class="role-name">Науковець</div>
+      <div class="role-desc">Аспірант / PhD+</div>
+    </div>
+  </div>
+
+  <form id="regForm" novalidate>
+    <!-- Name row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="firstName">Ім'я</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="firstName" placeholder="Олена" autocomplete="given-name">
+        </div>
+        <div class="error-msg" id="firstNameErr">Введіть ім'я</div>
+      </div>
+      <div class="form-group">
+        <label for="lastName">Прізвище</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="lastName" placeholder="Власенко" autocomplete="family-name">
+        </div>
+        <div class="error-msg" id="lastNameErr">Введіть прізвище</div>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Електронна пошта</label>
+      <div class="input-wrap">
+        <span class="input-icon">✉️</span>
+        <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="error-msg" id="emailErr">Введіть коректну email-адресу</div>
+    </div>
+
+    <!-- Institution (shown for student/scientist) -->
+    <div class="form-group" id="instGroup" style="display:none;">
+      <label for="institution">Університет / Установа</label>
+      <div class="input-wrap">
+        <span class="input-icon">🏛️</span>
+        <input type="text" id="institution" placeholder="КНУ ім. Тараса Шевченка">
+      </div>
+    </div>
+
+    <!-- Research interests -->
+    <div class="form-group">
+      <label for="interests">Наукові інтереси</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔬</span>
+        <input type="text" id="interests" placeholder="Біологія, ШІ, Хімія...">
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div class="form-group">
+      <label for="password">Пароль</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="password" placeholder="Мінімум 8 символів" autocomplete="new-password">
+        <button type="button" class="password-toggle" id="togglePwd">👁</button>
+      </div>
+      <div class="strength-bar-wrap">
+        <div class="strength-track"><div class="strength-fill" id="strengthFill"></div></div>
+        <div class="strength-label" id="strengthLabel">Введіть пароль</div>
+      </div>
+      <div class="error-msg" id="passwordErr">Пароль занадто короткий (мін. 8 символів)</div>
+    </div>
+
+    <!-- Confirm password -->
+    <div class="form-group">
+      <label for="confirm">Підтвердити пароль</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="confirm" placeholder="Повторіть пароль" autocomplete="new-password">
+        <button type="button" class="password-toggle" id="toggleConfirm">👁</button>
+      </div>
+      <div class="error-msg" id="confirmErr">Паролі не співпадають</div>
+    </div>
+
+    <!-- Terms -->
+    <label class="terms-wrap">
+      <input type="checkbox" id="terms">
+      <span class="terms-text">
+        Я погоджуюсь з <a href="#">Умовами використання</a> та <a href="#">Політикою конфіденційності</a> RoSTEMo
+      </span>
+    </label>
+    <div class="error-msg" id="termsErr" style="margin-top:-12px;margin-bottom:16px;">Необхідно прийняти умови</div>
+
+    <button type="submit" class="btn-submit" id="submitBtn">Зареєструватись безкоштовно</button>
+  </form>
+
+  <div class="or-sep">або зареєструватись через</div>
+  <div class="social-btns">
+    <button class="btn-social">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Google
+    </button>
+    <button class="btn-social">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#0088cc"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+      Telegram
+    </button>
+  </div>
+
+  <p class="bottom-link">
+    Вже маєш акаунт? <a href="login.html">Увійти →</a>
+  </p>
+</div>
+
+<script>
+  // Role selector
+  const roleCards = document.querySelectorAll('.role-card');
+  const instGroup = document.getElementById('instGroup');
+  let selectedRole = 'school';
+
+  roleCards.forEach(card => {
+    card.addEventListener('click', () => {
+      roleCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedRole = card.dataset.role;
+      instGroup.style.display = (selectedRole !== 'school') ? 'block' : 'none';
+    });
+  });
+
+  // Password toggle
+  function togglePassword(inputId, btnId) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    btn.addEventListener('click', () => {
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.textContent = show ? '🙈' : '👁';
+    });
+  }
+  togglePassword('password', 'togglePwd');
+  togglePassword('confirm', 'toggleConfirm');
+
+  // Password strength
+  const pwdInput = document.getElementById('password');
+  const fill = document.getElementById('strengthFill');
+  const label = document.getElementById('strengthLabel');
+
+  pwdInput.addEventListener('input', () => {
+    const val = pwdInput.value;
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const levels = [
+      { w: '0%',   bg: 'transparent',      text: 'Введіть пароль' },
+      { w: '25%',  bg: 'var(--error)',      text: 'Слабкий' },
+      { w: '50%',  bg: 'var(--amber)',      text: 'Задовільний' },
+      { w: '75%',  bg: 'var(--violet)',     text: 'Хороший' },
+      { w: '100%', bg: 'var(--success)',    text: '✓ Надійний' },
+    ];
+
+    const l = val.length === 0 ? levels[0] : levels[score] || levels[1];
+    fill.style.width = l.w;
+    fill.style.background = l.bg;
+    label.textContent = l.text;
+    label.style.color = l.bg === 'transparent' ? 'var(--text-muted)' : l.bg;
+  });
+
+  // Remove error on input
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', () => {
+      input.classList.remove('error', 'valid');
+      const err = document.getElementById(input.id + 'Err');
+      if (err) err.classList.remove('show');
+    });
+  });
+
+  // Form submit
+  document.getElementById('regForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let valid = true;
+
+    const fields = [
+      { id: 'firstName', errId: 'firstNameErr', check: v => v.trim().length >= 2, msg: "Введіть ім'я" },
+      { id: 'lastName',  errId: 'lastNameErr',  check: v => v.trim().length >= 2, msg: 'Введіть прізвище' },
+      { id: 'email',     errId: 'emailErr',     check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msg: 'Некоректна email-адреса' },
+      { id: 'password',  errId: 'passwordErr',  check: v => v.length >= 8, msg: 'Мінімум 8 символів' },
+    ];
+
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const err = document.getElementById(f.errId);
+      if (!f.check(el.value)) {
+        el.classList.add('error'); err.classList.add('show'); valid = false;
+      }
+    });
+
+    // Confirm password
+    const pwd = document.getElementById('password').value;
+    const conf = document.getElementById('confirm');
+    const confErr = document.getElementById('confirmErr');
+    if (conf.value !== pwd) {
+      conf.classList.add('error'); confErr.classList.add('show'); valid = false;
+    }
+
+    // Terms
+    const terms = document.getElementById('terms');
+    const termsErr = document.getElementById('termsErr');
+    if (!terms.checked) {
+      termsErr.classList.add('show'); valid = false;
+    }
+
+    if (valid) {
+      const btn = document.getElementById('submitBtn');
+      btn.textContent = 'Реєстрація...';
+      btn.classList.add('loading');
+      setTimeout(() => {
+        btn.textContent = '✓ Акаунт створено!';
+        btn.style.background = '#2dd4bf';
+        btn.style.boxShadow = '0 0 24px rgba(45,212,191,0.4)';
+      }, 1400);
+    }
+  });
+</script>
+</body>
+</html>
